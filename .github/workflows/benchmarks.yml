@@ -1,4 +1,4 @@
-name: 'Benchmarks - Raw'
+name: 'Benchmarks'
 
 
 on:
@@ -24,7 +24,7 @@ env:
 
 jobs:
 
-  tests:
+  test-benchmarks:
     name: "Tests"
     runs-on: ubuntu-22.04
     permissions:

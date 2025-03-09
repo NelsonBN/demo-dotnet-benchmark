@@ -2,7 +2,7 @@ name: 'Tests'
 
 
 on:
-  workflow_dispatch: # for manual dispatch
+  workflow_dispatch:
   pull_request:
     types: [opened, reopened, edited, synchronize]
     branches:

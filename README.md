@@ -1,6 +1,5 @@
 # Demo - .NET Benchmarks
 
-
 ## References
 
 - [BenchmarkDotNet](https://benchmarkdotnet.org/index.html)

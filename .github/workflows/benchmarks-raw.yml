@@ -1,0 +1,74 @@
+name: 'Benchmarks - Raw'
+
+
+on:
+  workflow_dispatch: # for manual dispatch
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+    branches:
+      - main
+
+
+env:
+  SDK_VERSION: '9.0.200'
+  REPORTS_DIRECTORY: 'BenchmarkDotNet.Artifacts/results'
+  PROJECT_PATH: 'tests/Demo.Benchmarks/Demo.Benchmarks.csproj'
+
+  # Set up the .NET environment to improve test performance and reliability
+  DOTNET_CLI_TELEMETRY_OPTOUT: true # Disable .NET CLI telemetry
+  DOTNET_NOLOGO: true # Disable .NET CLI logo
+  DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true # Enable ANSI color redirection
+  TERM: xterm # Enable ANSI color redirection
+  NUGET_XMLDOC_MODE: skip # Disable NuGet XML documentation generation
+
+
+jobs:
+
+  tests:
+    name: "Tests"
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v4.2.2
+
+    - name: "Setup .NET"
+      uses: actions/setup-dotnet@v4.3.0
+      with:
+        dotnet-version: ${{ env.SDK_VERSION }}
+
+    - name: "Restore dependencies"
+      run: dotnet restore ${{ github.workspace }}/${{ env.PROJECT_PATH }}
+
+    - name: "Build"
+      run: dotnet build --no-restore --configuration Release ${{ github.workspace }}/${{ env.PROJECT_PATH }}
+
+    - name: "Run tests"
+      run: dotnet run --project ${{ github.workspace }}/${{ env.PROJECT_PATH }} --configuration Release --no-build
+
+    - name: "Publish report"
+      run: cat $(find ${{ github.workspace }}/${{ env.REPORTS_DIRECTORY }}/* -name "*.md") > $GITHUB_STEP_SUMMARY
+
+    - name: "Publish Benchmark Report"
+      uses: actions/upload-artifact@v4.6.1
+      with:
+        name: BenchmarkReport
+        path: ${{ github.workspace }}/${{ env.REPORTS_DIRECTORY }}/*
+        if-no-files-found: error
+
+    - name: "Discover markdown report"
+      run: |
+        export PATH_MARKDOWN_REPORT=$(find "${{ github.workspace }}/${{ env.REPORTS_DIRECTORY }}"/* -name "*github.md")
+        echo "PATH_MARKDOWN_REPORT=${PATH_MARKDOWN_REPORT}" >> $GITHUB_ENV
+
+    - name: "Display path to markdown report"
+      run: echo "Markdown Report '${{ env.PATH_MARKDOWN_REPORT }}'"
+
+    - name: "Add Report in PR Comment"
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: github.event_name == 'pull_request'
+      with:
+        header: benchmark-report
+        hide_and_recreate: true
+        hide_classify: "OUTDATED"
+        path: ${{ env.PATH_MARKDOWN_REPORT }}

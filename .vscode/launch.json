@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/tests/Demo.Benchmarks/bin/Debug/net9.0/Demo.Benchmarks.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/tests/Demo.Benchmarks",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
